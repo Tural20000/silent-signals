@@ -2,10 +2,12 @@ package com.abdullayevtural.silent_signals.service;
 
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
+@ConditionalOnProperty(name = "app.redis.enabled", havingValue = "true", matchIfMissing = true)
 public class RedisService {
 	private final RedisTemplate<String, Object> redisTemplate;
 

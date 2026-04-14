@@ -2,6 +2,7 @@ package com.abdullayevtural.silent_signals.service;
 
 import java.time.LocalDateTime;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
 import com.abdullayevtural.silent_signals.dto.SOSRequest;
@@ -13,8 +14,8 @@ public class SOSService {
 	private final SOSRepository sosRepository;
 	private final RedisService redisService;
 
-	public SOSService(SOSRepository sosRepository, RedisService redisService) {
-		this.redisService = redisService;
+	public SOSService(SOSRepository sosRepository, ObjectProvider<RedisService> redisServiceProvider) {
+		this.redisService = redisServiceProvider.getIfAvailable();
 		this.sosRepository = sosRepository;
 
 	}
@@ -28,8 +29,10 @@ public class SOSService {
 		alert.setCreatedAt(LocalDateTime.now());
 		sosRepository.save(alert);
 
-		String locationInfo = "Lat: " + request.getLatitude() + ", Lon: " + request.getLongitude();
-		redisService.createSOSSession(userId, locationInfo);
+		if (redisService != null) {
+			String locationInfo = "Lat: " + request.getLatitude() + ", Lon: " + request.getLongitude();
+			redisService.createSOSSession(userId, locationInfo);
+		}
 
 	}
 

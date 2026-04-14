@@ -12,6 +12,8 @@ import com.abdullayevtural.silent_signals.model.User;
 import com.abdullayevtural.silent_signals.repository.UserRepository;
 import com.abdullayevtural.silent_signals.service.SOSService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/sos")
 public class SOSController {
@@ -25,7 +27,7 @@ public class SOSController {
 	}
 
 	@PostMapping("/send")
-	public ResponseEntity<String> sendSOS(@RequestBody SOSRequest request, Authentication authentication) {
+	public ResponseEntity<String> sendSOS(@Valid @RequestBody SOSRequest request, Authentication authentication) {
 		String username = authentication.getName();
 		User user = userRepository.findByUsername(username)
 				.orElseThrow(() -> new RuntimeException("Istifadeci tapilmadi"));

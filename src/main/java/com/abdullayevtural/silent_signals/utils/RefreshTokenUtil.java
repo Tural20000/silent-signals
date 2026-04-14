@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -18,10 +19,11 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class RefreshTokenUtil {
 
-	private final String REFRESH_SECRET_KEY = "dhhfgnmr4Rtc5hhjwTe2ttDdfdfGghgjjPjfdghhh3v32GelsdwdSHog5Hfpia3";
+	@Value("${security.jwt.refresh-secret}")
+	private String refreshSecretKey;
 
 	private Key getSigningKey() {
-		return Keys.hmacShaKeyFor(REFRESH_SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+		return Keys.hmacShaKeyFor(refreshSecretKey.getBytes(StandardCharsets.UTF_8));
 	}
 
 	public String extractUsername(String token) {

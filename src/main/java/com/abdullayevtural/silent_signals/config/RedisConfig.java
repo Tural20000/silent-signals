@@ -2,6 +2,7 @@ package com.abdullayevtural.silent_signals.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.PatternTopic;
@@ -13,6 +14,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import com.abdullayevtural.silent_signals.service.RedisExpirationListener;
 
 @Configuration
+@ConditionalOnProperty(name = "app.redis.enabled", havingValue = "true", matchIfMissing = true)
 public class RedisConfig {
 
 	@Bean
