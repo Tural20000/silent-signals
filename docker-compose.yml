@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: silent-signals-mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: silent_signals_db
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "3310:3306"
+
+  redis-cache:
+    image: redis:latest
+    container_name: silent-signals-redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+    app-service:
+    build: .
+    container_name: silent-signals-app
+    ports:
+      - "8011:8011"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/silent_signals_db
+      SPRING_REDIS_HOST: redis-cache
+      GMAIL_PASS: ${GMAIL_PASS}     depends_on:
+      - mysql-db
+      - redis-cache
