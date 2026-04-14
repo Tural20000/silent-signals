@@ -16,7 +16,7 @@ public class RedisService {
 
 	public void createSOSSession(Long userId, String locationData) {
 		String key = "sos_session:" + userId;
-		redisTemplate.opsForValue().set(key, locationData, 1, TimeUnit.MINUTES);
+		redisTemplate.opsForValue().set(key, locationData, 3, TimeUnit.MINUTES);
 
 	}
 

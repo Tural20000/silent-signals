@@ -52,7 +52,7 @@ public class UserRegistrationController {
 		user.setPhoneNumber(request.getPhoneNumber());
 
 		Set<Role> roles = new HashSet<>();
-		// Bazada ROLE_USER-i axtarırıq, yoxdursa yaradırıq
+
 		roleRepository.findByName("ROLE_USER").ifPresentOrElse(roles::add, () -> {
 			Role defaultRole = new Role();
 			defaultRole.setName("ROLE_USER");

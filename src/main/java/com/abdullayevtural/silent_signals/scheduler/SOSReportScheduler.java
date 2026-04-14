@@ -11,7 +11,7 @@ public class SOSReportScheduler {
 	@Scheduled(cron = "0 0 0 * * *")
 	public void generateDailyReport() {
 
-		System.out.println("📊 Gündəlik Hesabat Hazırlanır: " + LocalDateTime.now());
+		System.out.println("Gündəlik Hesabat Hazırlanır: " + LocalDateTime.now());
 
 	}
 }

@@ -36,14 +36,12 @@ public class SecurityConfig {
 		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf(csrf -> csrf.disable())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth
-						// Bütün auth, sos və kontakt yollarını tam açırıq
+
 						.requestMatchers("/api/auth/**").permitAll().requestMatchers("/api/sos/**").permitAll()
 						.requestMatchers("/api/contacts/**").permitAll()
-						// Əgər Controller-də @RequestMapping("/api/auth") varsa, aşağıdakına ehtiyac
-						// yoxdur, amma ehtiyat üçün qalsın
+
 						.requestMatchers("/reg-user").permitAll().anyRequest().authenticated());
 
-		// Filter sırası çox vacibdir
 		http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
