@@ -1,31 +1,38 @@
 version: '3.8'
 
 services:
-  mysql-db:
-    image: mysql:8.0
-    container_name: silent-signals-mysql
-    restart: always
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: silent-signals-postgres
+    restart: unless-stopped
     environment:
-      MYSQL_DATABASE: silent_signals_db
-      MYSQL_ROOT_PASSWORD: root_password
+      POSTGRES_DB: silent_signals_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
-      - "3310:3306"
+      - "5432:5432"
 
   redis-cache:
-    image: redis:latest
+    image: redis:7-alpine
     container_name: silent-signals-redis
-    restart: always
+    restart: unless-stopped
     ports:
       - "6379:6379"
 
-    app-service:
+  app-service:
     build: .
     container_name: silent-signals-app
     ports:
       - "8011:8011"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/silent_signals_db
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/silent_signals_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_REDIS_HOST: redis-cache
-      GMAIL_PASS: ${GMAIL_PASS}     depends_on:
-      - mysql-db
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      GMAIL_PASS: ${GMAIL_PASS}
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production-access}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-in-production-refresh}
+    depends_on:
+      - postgres-db
       - redis-cache

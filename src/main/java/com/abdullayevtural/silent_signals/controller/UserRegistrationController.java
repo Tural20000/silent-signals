@@ -1,6 +1,7 @@
 package com.abdullayevtural.silent_signals.controller;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.abdullayevtural.silent_signals.dto.UserRequest;
+import com.abdullayevtural.silent_signals.exception.ConflictException;
 import com.abdullayevtural.silent_signals.model.Role;
 import com.abdullayevtural.silent_signals.model.User;
 import com.abdullayevtural.silent_signals.repository.RoleRepository;
@@ -22,7 +24,7 @@ import com.abdullayevtural.silent_signals.repository.UserRepository;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/auth") // ARTIQ SecurityConfig BU YOLU TANIYACAQ
+@RequestMapping("/api/auth")
 public class UserRegistrationController {
 
 	private static final Logger log = LoggerFactory.getLogger(UserRegistrationController.class);
@@ -36,13 +38,12 @@ public class UserRegistrationController {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
-	@PostMapping("/reg-user")
-	public ResponseEntity<?> registerUser(@Valid @RequestBody UserRequest request) {
-		log.info("📝 Yeni qeydiyyat cəhdi: {}", request.getUsername());
+	@PostMapping({ "/register", "/reg-user" })
+	public ResponseEntity<Map<String, String>> registerUser(@Valid @RequestBody UserRequest request) {
+		log.info("Yeni qeydiyyat cəhdi: {}", request.getUsername());
 
 		if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-			log.warn("⚠️ İstifadəçi adı artıq tutulub: {}", request.getUsername());
-			return ResponseEntity.status(409).body("İstifadəçi artıq mövcuddur");
+			throw new ConflictException("İstifadəçi artıq mövcuddur");
 		}
 
 		User user = new User();
@@ -62,7 +63,7 @@ public class UserRegistrationController {
 		user.setRoles(roles);
 		userRepository.save(user);
 
-		log.info("✅ İstifadəçi uğurla qeydiyyatdan keçdi: {}", request.getUsername());
-		return ResponseEntity.status(201).body("Qeydiyyat uğurla tamamlandı");
+		log.info("İstifadəçi uğurla qeydiyyatdan keçdi: {}", request.getUsername());
+		return ResponseEntity.status(201).body(Map.of("message", "Qeydiyyat uğurla tamamlandı"));
 	}
 }

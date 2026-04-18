@@ -1,15 +1,15 @@
 package com.abdullayevtural.silent_signals.controller;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,27 +44,27 @@ public class AuthController {
 
 	@PostMapping("/login")
 	public ResponseEntity<?> createAuthenticationToken(@Valid @RequestBody AuthRequest authRequest) {
-		log.info("🔐 Login cəhdi: {}", authRequest.getUsername());
+		log.info("Login cəhdi: {}", authRequest.getUsername());
 
 		try {
 			authenticationManager.authenticate(
 					new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
 		} catch (BadCredentialsException e) {
-			log.warn(" Uğursuz login cəhdi: {}", authRequest.getUsername());
-			return ResponseEntity.status(401).body("İstifadəçi adı və ya şifrə səhvdir");
+			log.warn("Uğursuz login cəhdi: {}", authRequest.getUsername());
+			return ResponseEntity.status(401).body(Map.of("message", "İstifadəçi adı və ya şifrə səhvdir"));
 		}
 
 		final UserDetails userDetails = userDetailsService.loadUserByUsername(authRequest.getUsername());
 		final String jwt = jwtUtil.generateToken(userDetails);
 		final String refreshToken = refreshTokenUtil.generateRefreshToken(userDetails);
 
-		log.info(" Login uğurlu: {}", authRequest.getUsername());
+		log.info("Login uğurlu: {}", authRequest.getUsername());
 		return ResponseEntity.ok(new AuthResponse(jwt, refreshToken));
 	}
 
 	@PostMapping("/refresh-token")
 	public ResponseEntity<?> refreshToken(@Valid @RequestBody TokenRequest tokenRequest) {
-		log.info(" Refresh token istifadə olunur...");
+		log.info("Refresh token istifadə olunur");
 
 		String refreshToken = tokenRequest.getRefreshToken();
 		String username = refreshTokenUtil.extractUsername(refreshToken);
@@ -73,36 +73,10 @@ public class AuthController {
 
 		if (refreshTokenUtil.validateToken(refreshToken, userDetails)) {
 			final String newAccessToken = jwtUtil.generateToken(userDetails);
-			log.info(" Yeni Access Token yaradıldı: {}", username);
+			log.info("Yeni access token yaradıldı: {}", username);
 			return ResponseEntity.ok(new AuthResponse(newAccessToken, refreshToken));
-		} else {
-			log.error("Keçərsiz Refresh Token: {}", username);
-			return ResponseEntity.status(403).body("Invalid refresh token");
 		}
-	}
-
-	@GetMapping("/add")
-	@PreAuthorize(value = "hasAuthority('ROLE_ADD')")
-	public String addData() {
-		log.info(" Məlumat əlavə edildi");
-		return "add success";
-	}
-
-	@GetMapping("/get")
-	@PreAuthorize(value = "hasAuthority('ROLE_GET')")
-	public String getData() {
-		return "get success";
-	}
-
-	@GetMapping("/update")
-	@PreAuthorize(value = "hasAuthority('ROLE_UPDATE')")
-	public String updateData() {
-		return "update success";
-	}
-
-	@GetMapping("/delete")
-	@PreAuthorize(value = "hasAuthority('ROLE_DELETE')")
-	public String deleteData() {
-		return "delete success";
+		log.error("Keçərsiz refresh token: {}", username);
+		return ResponseEntity.status(403).body(Map.of("message", "Keçərsiz refresh token"));
 	}
 }

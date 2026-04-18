@@ -27,10 +27,15 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
 	}
 
+	@ExceptionHandler(BusinessException.class)
+	public ResponseEntity<Map<String, String>> handleBusiness(BusinessException ex) {
+		return ResponseEntity.status(ex.getStatus()).body(Map.of("message", ex.getMessage()));
+	}
+
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<?> handleGeneralException(Exception ex) {
 		log.error("Unhandled exception occurred", ex);
-		return new ResponseEntity<>("Xəta baş verdi. Zəhmət olmasa bir az sonra yenidən cəhd edin.",
+		return new ResponseEntity<>(Map.of("message", "Xəta baş verdi. Zəhmət olmasa bir az sonra yenidən cəhd edin."),
 				HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 }
